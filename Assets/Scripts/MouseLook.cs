@@ -10,7 +10,7 @@ public class MouseLook : MonoBehaviour
     public float maximumVert = 45.0f;
     private float verticalRot = 0;
 
-    private Vector2 lookInput;
+    private static Vector2 lookInput;
 
     public enum RotationAxes
     {
@@ -42,7 +42,7 @@ public class MouseLook : MonoBehaviour
         {
             verticalRot -= sensitivityVert * lookInput.y;
             verticalRot = Mathf.Clamp(verticalRot, minimumVert, maximumVert);
-            float horizontalRot = transform.localEulerAngles.y;
+            float horizontalRot = 0;
             transform.localEulerAngles = new Vector3(verticalRot, horizontalRot, 0);
         }
         else
