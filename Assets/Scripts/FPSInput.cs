@@ -4,19 +4,59 @@ using UnityEngine.InputSystem;
 public class FPSInput : MonoBehaviour
 {
     public float speed = 5.0f;
+    private float originalSpeed;
     public float gravity = 9.8f;
     private CharacterController controller;
+    private PlayerCharacter playerCharacter;
     private Vector2 moveInput;
-     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    public float jumpForce = 5.0f;
+    private float verticalVelocity = 0f;
+    //added jumping and sprinting mechanics, with stamina drain for sprinting and regeneration when not sprinting. also added a boolean to track if the player is currently sprinting or moving, which can be used for animations in the future! :D
+
+    public bool isSprinting = false;
+    public bool isMoving = false;
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        playerCharacter = GetComponent<PlayerCharacter>();
+        originalSpeed = speed; 
     }
+
+    public void OnSprint(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if(playerCharacter != null && playerCharacter.currentStamina <= 0)
+            {
+                Debug.Log("Not enough stamina to sprint!");
+                return;
+            }
+            isSprinting = true;
+            speed *= 1.5f;
+        }
+        else if (context.canceled)
+        {
+            speed = originalSpeed; 
+            isSprinting = false;
+
+        }
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed && controller.isGrounded)
+        {
+            verticalVelocity = jumpForce;
+        }
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
+        
     }
 
     // Update is called once per frame
@@ -25,7 +65,33 @@ public class FPSInput : MonoBehaviour
         Vector3 movement = new Vector3(moveInput.x, 0, moveInput.y);
         movement = transform.TransformDirection(movement);
         movement *= speed * Time.deltaTime;
-        movement.y = -gravity * Time.deltaTime;
+        
+        if (controller.isGrounded && verticalVelocity < 0)
+            verticalVelocity = -2f;  
+
+        verticalVelocity -= gravity * Time.deltaTime;
+        movement.y = verticalVelocity * Time.deltaTime;
+
         controller.Move(movement);
+        if (isSprinting)
+        {
+            playerCharacter.StaminaDrain();
+
+            if (playerCharacter.currentStamina <= 0) 
+            {
+                isSprinting = false;
+                speed = originalSpeed;
+                Debug.Log("Out of stamina!");
+            }
+        }
+        if(playerCharacter.currentStamina >= playerCharacter.maxStamina)
+        {
+            playerCharacter.currentStamina = playerCharacter.maxStamina;
+        }
+        else if(!isSprinting && playerCharacter.currentStamina < playerCharacter.maxStamina)
+        {
+            playerCharacter.StaminaRegen();
+        }
+        isMoving = moveInput.magnitude > 0;
     }
 }
