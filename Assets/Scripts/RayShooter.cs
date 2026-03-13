@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class RayShooter : MonoBehaviour
 {
@@ -10,13 +11,13 @@ public class RayShooter : MonoBehaviour
     void Start()
     {
         cam = GetComponent<Camera>();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked; // comment this out if u want to always have cursor, we replacing with ESCAPE to open settings and pause game though
+        //Cursor.visible = false;
     }
 
     void Update()
     {
-        if(Fire.action.WasPressedThisFrame())
+        if(Fire.action.WasPressedThisFrame() && !EventSystem.current.IsPointerOverGameObject()) //added check to prevent shooting, think it'll be removed soon
         {
             Vector3 point = new Vector3(cam.pixelWidth / 2, cam.pixelHeight / 2, 0);
 
@@ -31,6 +32,7 @@ public class RayShooter : MonoBehaviour
                 {
                     target.ReactToHit();
                     FindFirstObjectByType<Crosshair>().ShowHitMarker(); //shows hit marker on crosshair when enemy is hit
+                    GameEvents.EnemyHit(); //Messenger.Broadcast(GameEvent.Enemyhit) 
                 }
                 else 
                 {

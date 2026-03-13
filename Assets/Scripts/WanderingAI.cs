@@ -10,6 +10,22 @@ public class WanderingAI : MonoBehaviour
     public float obstacleRange = 5.0f;    
 
     private bool isAlive;
+    public const float baseSpeed = 3f;
+
+    private void OnEnable()
+    {
+        GameEvents.OnSpeedChanged += OnSpeedChanged;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnSpeedChanged -= OnSpeedChanged;
+    }
+
+    private void OnSpeedChanged(float value)
+    {
+        speed = baseSpeed + value;
+    }
 
     private void Start()
     {

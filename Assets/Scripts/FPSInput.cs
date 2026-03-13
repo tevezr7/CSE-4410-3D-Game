@@ -3,12 +3,14 @@ using UnityEngine.InputSystem;
 
 public class FPSInput : MonoBehaviour
 {
-    public float speed = 5.0f;
     private float originalSpeed;
     public float gravity = 9.8f;
     private CharacterController controller;
     private PlayerCharacter playerCharacter;
     private Vector2 moveInput;
+    public const float baseSpeed = 5f;
+    private float speedMultiplier = 1f;
+    private float speed => baseSpeed * speedMultiplier * (isSprinting ? 1.5f : 1f);
 
     public float jumpForce = 5.0f;
     private float verticalVelocity = 0f;
@@ -16,11 +18,26 @@ public class FPSInput : MonoBehaviour
 
     public bool isSprinting = false;
     public bool isMoving = false;
+
+    private void OnEnable()
+    {
+        GameEvents.OnSpeedChanged += OnSpeedChanged;
+    }
+    
+    private void OnDisable()
+    {
+        GameEvents.OnSpeedChanged -= OnSpeedChanged;
+    }
+
+    private void OnSpeedChanged(float value)
+    {
+        speedMultiplier = value;
+    }
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        playerCharacter = GetComponent<PlayerCharacter>();
-        originalSpeed = speed; 
+        playerCharacter = GetComponent<PlayerCharacter>(); 
     }
 
     public void OnSprint(InputAction.CallbackContext context)
@@ -33,11 +50,9 @@ public class FPSInput : MonoBehaviour
                 return;
             }
             isSprinting = true;
-            speed *= 1.5f;
         }
         else if (context.canceled)
         {
-            speed = originalSpeed; 
             isSprinting = false;
 
         }
@@ -80,7 +95,6 @@ public class FPSInput : MonoBehaviour
             if (playerCharacter.currentStamina <= 0) 
             {
                 isSprinting = false;
-                speed = originalSpeed;
                 Debug.Log("Out of stamina!");
             }
         }
