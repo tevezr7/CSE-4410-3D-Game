@@ -17,7 +17,8 @@ public class FPSInput : MonoBehaviour
     private float verticalVelocity = 0f;
     private float targetLeanAngle = 0f;
     private float currentLeanAngle = 0f;
-    //added jumping and sprinting mechanics, with stamina drain for sprinting and regeneration when not sprinting. also added a boolean to track if the player is currently sprinting or moving, which can be used for animations in the future! :D
+    private float targetLeanOffset = 0f;
+    private float currentLeanOffset = 0f;
 
     public bool isSprinting = false;
     public bool isMoving = false;
@@ -109,19 +110,21 @@ public class FPSInput : MonoBehaviour
 
     public void OnRightLean(InputAction.CallbackContext context)
     {
-        if (context.performed) targetLeanAngle = -15f;
-        else if (context.canceled) targetLeanAngle = 0f;
+        if (context.performed) { targetLeanAngle = -15f; targetLeanOffset = 0.5f; }
+        else if (context.canceled) { targetLeanAngle = 0f; targetLeanOffset = 0f; }
     }
 
     public void OnLeftLean(InputAction.CallbackContext context)
     {
-        if (context.performed) targetLeanAngle = 15f;
-        else if (context.canceled) targetLeanAngle = 0f;
+        if (context.performed) { targetLeanAngle = 15f; targetLeanOffset = -0.5f; }
+        else if (context.canceled) { targetLeanAngle = 0f; targetLeanOffset = 0f; }
     }
+
 
     // Update is called once per frame
     void Update()
     {
+        currentLeanOffset = Mathf.Lerp(currentLeanOffset, targetLeanOffset, Time.deltaTime * 10f);
         currentLeanAngle = Mathf.LerpAngle(currentLeanAngle, targetLeanAngle, Time.deltaTime * 10f);
         cam.transform.localEulerAngles = new Vector3(
             cam.transform.localEulerAngles.x,
