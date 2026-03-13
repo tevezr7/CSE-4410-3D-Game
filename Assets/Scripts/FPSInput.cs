@@ -125,6 +125,7 @@ public class FPSInput : MonoBehaviour
     void Update()
     {
         currentLeanOffset = Mathf.Lerp(currentLeanOffset, targetLeanOffset, Time.deltaTime * 10f);
+        cam.transform.localPosition = new Vector3(currentLeanOffset, cam.transform.localPosition.y, cam.transform.localPosition.z);
         currentLeanAngle = Mathf.LerpAngle(currentLeanAngle, targetLeanAngle, Time.deltaTime * 10f);
         cam.transform.localEulerAngles = new Vector3(
             cam.transform.localEulerAngles.x,
