@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 
 public class FPSInput : MonoBehaviour
 {
-    private float originalSpeed;
     public float gravity = 9.8f;
     private CharacterController controller;
     private PlayerCharacter playerCharacter;
