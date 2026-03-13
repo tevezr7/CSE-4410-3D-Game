@@ -1,8 +1,24 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SettingsPopup : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private void Update()
+    {
+        if(Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            if(gameObject.activeSelf)
+            {
+                Close();
+                Time.timeScale = 1f; //unpause game when closing settings
+            }
+            else
+            {
+                Open();
+                Time.timeScale = 0f; //pause game when opening settings
+            }
+        }
+    }
     public void Open()
     {
         gameObject.SetActive(true);

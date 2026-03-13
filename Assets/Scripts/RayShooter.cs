@@ -11,8 +11,8 @@ public class RayShooter : MonoBehaviour
     void Start()
     {
         cam = GetComponent<Camera>();
-        //Cursor.lockState = CursorLockMode.Locked; // comment this out if u want to always have cursor, we replacing with ESCAPE to open settings and pause game though
-        //Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked; // comment this out if u want to always have cursor, we replacing with ESCAPE to open settings and pause game though
+        Cursor.visible = false;
     }
 
     void Update()
@@ -34,7 +34,7 @@ public class RayShooter : MonoBehaviour
                     FindFirstObjectByType<Crosshair>().ShowHitMarker(); //shows hit marker on crosshair when enemy is hit
                     GameEvents.EnemyHit(); //Messenger.Broadcast(GameEvent.Enemyhit) 
                 }
-                else 
+                else //comment out when done debugging
                 {
                     StartCoroutine(SphereIndicator(hit.point));
                 }
@@ -43,7 +43,7 @@ public class RayShooter : MonoBehaviour
         }
     }
 
-    private IEnumerator SphereIndicator(Vector3 pos)
+    private IEnumerator SphereIndicator(Vector3 pos) //comment out when done debugging
     {
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         sphere.transform.position = pos;
