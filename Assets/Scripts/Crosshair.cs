@@ -59,9 +59,19 @@ public class Crosshair : MonoBehaviour
         }
     }
 
+    public void OnShoot()
+    {
+        currentSpread = dynamicSpread;
+    }
+
     private void OnGUI()
     {
-        float targetSpread = input.isMoving ? dynamicSpread : 0f;
+        float targetSpread = input.isADS ? 0f :
+                     input.isJumping ? dynamicSpread * 2f :
+                     input.isSprinting ? dynamicSpread * 1.5f :
+                     input.isCrouching ? dynamicSpread * 0.2f :
+                     input.isMoving ? dynamicSpread * 0.8f :
+                     dynamicSpread * 0.1f;
         currentSpread = Mathf.Lerp(currentSpread, targetSpread, Time.deltaTime * 10f);
 
         float cx = Screen.width / 2f;
