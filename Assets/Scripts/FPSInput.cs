@@ -7,8 +7,10 @@ public class FPSInput : MonoBehaviour
     public float gravity = 9.8f;
     private CharacterController controller;
     private PlayerCharacter playerCharacter;
-    private SettingsPopup settingsPopup;
+
+    [SerializeField] private SettingsPopup settingsPopup;
     private Camera cam;
+
     private Vector2 moveInput;
     public const float baseSpeed = 5f;
     private float speedMultiplier = 1f;
