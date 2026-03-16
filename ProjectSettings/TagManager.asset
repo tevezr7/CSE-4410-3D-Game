@@ -5,17 +5,22 @@ TagManager:
   serializedVersion: 3
   tags:
   - Enemy
+  - Gun
+  - EnemyHead
+  - Arms
+  - BulletTrail
+  - Specimen
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - BulletTrail
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Arms
+  - Gun
+  - Player
+  - Enemy
   - 
   - 
   - 

@@ -25,7 +25,7 @@ public class PlayerCharacter : MonoBehaviour
         
     }
 
-    public void Hurt(int damage)
+    public void Hurt(float damage)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
@@ -43,22 +43,18 @@ public class PlayerCharacter : MonoBehaviour
     public void StaminaDrain()
     {
         currentStamina -= staminaCost * Time.deltaTime; 
-        Debug.Log("Current stamina: " + currentStamina);
         if (currentStamina < 0)
         {
             currentStamina = 0;
-            Debug.Log("Player is exhausted!");
         }
     }
 
     public void StaminaRegen()
     {
         currentStamina += staminaRegen * Time.deltaTime; 
-        Debug.Log("Current stamina: " + currentStamina);
         if (currentStamina > maxStamina)
         {
             currentStamina = maxStamina;
-            Debug.Log("Player is fully rested!");
         }
     }
 

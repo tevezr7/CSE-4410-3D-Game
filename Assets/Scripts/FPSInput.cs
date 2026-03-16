@@ -1,15 +1,20 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 public class FPSInput : MonoBehaviour
 {
     public float gravity = 9.8f;
     private CharacterController controller;
     private PlayerCharacter playerCharacter;
-
-    [SerializeField] private SettingsPopup settingsPopup;
+    private Animator gunAnimator;
+    private SettingsPopup settingsPopup;
     private Camera cam;
+    private BaseGun activeGun;
+    private WeaponSwitcher weaponSwitcher;
+    private MeleeAttack knife;
 
     private Vector2 moveInput;
     public const float baseSpeed = 5f;
@@ -24,12 +29,24 @@ public class FPSInput : MonoBehaviour
     private float currentLeanOffset = 0f;
     private int leanDirection = 0;
     public float Fov = 90f;
+    private float slideTimer = 0f;
+    public float slideDuration = 0.5f;
+    private Vector3 slideDirection;
+    [SerializeField] private float slideSpeed = 8f;
+    [SerializeField] private float slideStaminaCost = 15f;
+    [SerializeField] private float knifeCooldown = 0.5f;
+    private float lastKnifeTime = -Mathf.Infinity;
 
     public bool isSprinting = false;
     public bool isMoving = false;
     public bool isCrouching = false;
     public bool isJumping = false;
     public bool isADS = false;
+    public bool isReloading = false;
+    public bool isSliding = false;
+    public bool isQuickKnifing = false;
+
+    private int previousWeapon = 0;
 
     private void OnEnable()
     {
@@ -52,6 +69,16 @@ public class FPSInput : MonoBehaviour
         playerCharacter = GetComponent<PlayerCharacter>();
         settingsPopup = FindFirstObjectByType<SettingsPopup>();
         cam = GetComponentInChildren<Camera>();
+        gunAnimator = GetComponentInChildren<Animator>();
+        weaponSwitcher = FindFirstObjectByType<WeaponSwitcher>();
+        knife = FindFirstObjectByType<MeleeAttack>();
+        Debug.Log($"Gun animator found: {gunAnimator.gameObject.name}");
+
+    }
+
+    public void SetActiveGun(BaseGun gun)
+    {
+        activeGun = gun;
     }
 
     public void OnSprint(InputAction.CallbackContext context)
@@ -72,6 +99,50 @@ public class FPSInput : MonoBehaviour
         }
     }
 
+    public void OnReload(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (activeGun == null) return;
+        if (activeGun.currentAmmo == activeGun.magSize) return;
+        if (activeGun.reserveAmmo <= 0) return;
+        isSprinting = false; //force stop sprinting when reloading
+        gunAnimator.ResetTrigger("Reload");
+        gunAnimator.SetTrigger("Reload");
+
+    }
+
+    public void OnMelee(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (isSprinting) return;
+        if (isQuickKnifing) return;
+        if (isSliding) return;
+        if (activeGun != null && activeGun.isReloading) return;
+        if (Time.time < lastKnifeTime + knifeCooldown) return;
+        lastKnifeTime = Time.time;
+        isQuickKnifing = true;
+        StartCoroutine(QuickKnife());
+    }
+
+    private IEnumerator QuickKnife()
+    {
+        isQuickKnifing = true;
+        previousWeapon = weaponSwitcher.currentWeapon;
+        weaponSwitcher.SwitchTo(5);
+        yield return new WaitForSeconds(0.2f);
+        knife = weaponSwitcher.weapons[5].GetComponent<MeleeAttack>();
+        if (knife != null) knife.Slash();
+        yield return new WaitForSeconds(0.3f);
+        if (gunAnimator != null)
+        {
+            gunAnimator.ResetTrigger("Fire");
+            gunAnimator.ResetTrigger("Reload");
+            gunAnimator.SetBool("isADS", false);
+        }
+        weaponSwitcher.SwitchTo(previousWeapon); 
+        isQuickKnifing = false;
+    }
+
     public void OnJump(InputAction.CallbackContext context)
     {
         if (context.performed && controller.isGrounded)
@@ -84,8 +155,9 @@ public class FPSInput : MonoBehaviour
     {
         if (context.performed)
         {
+            if (isSliding) return;
             isADS = true;
-            isSprinting = false; //force stop sprinting when aiming down sights
+            isSprinting = false; 
         }
 
         else if (context.canceled)
@@ -98,11 +170,23 @@ public class FPSInput : MonoBehaviour
     {
         if (!context.performed) return;
 
+        if (isSprinting && !isSliding)
+        {
+            StartSlide();
+            return;
+        }
+
+        if (isSliding)
+        {
+            StopSlide();
+            return;
+        }
+
         Physics.SphereCast(transform.position, 0.5f, Vector3.up, out RaycastHit hit, 1f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore);
         if (!isCrouching)
         {
             isCrouching = true;
-            isSprinting = false; //force stop sprinting when crouching
+            isSprinting = false; 
         }
         else
         if (hit.collider != null)
@@ -115,10 +199,21 @@ public class FPSInput : MonoBehaviour
         }
     }
 
-    //public void OnSlide(InputAction.CallbackContext context)
-    //{
-    //    
-    //}
+    private void StartSlide()
+    {
+        isSliding = true;
+        isCrouching = true;
+        isSprinting = false;
+        slideTimer = slideDuration;
+        slideDirection = transform.TransformDirection(new Vector3(moveInput.x, 0, moveInput.y)).normalized;
+        playerCharacter.currentStamina -= slideStaminaCost;
+    }
+
+    private void StopSlide()
+    {
+        isSliding = false;
+        isCrouching = false;
+    }
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -160,14 +255,34 @@ public class FPSInput : MonoBehaviour
         //end of jumping
 
         //crouching
-        Vector3 targetScale = isCrouching ? new Vector3(1, 0.65f, 1) : Vector3.one;
-        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 10f);
+        // replace with:
+        float targetCamY = isCrouching ? 0.5f : 0.9f;
+        cam.transform.localPosition = new Vector3(
+            currentLeanOffset,
+            Mathf.Lerp(cam.transform.localPosition.y, targetCamY, Time.deltaTime * 10f),
+            cam.transform.localPosition.z
+        );
+        float targetHeight = isCrouching ? 1.3f : 2f;
+        controller.height = Mathf.Lerp(controller.height, targetHeight, Time.deltaTime * 10f);
         //end of crouching
 
         //ads
-        float targetFov = isADS ? Fov * 0.75f : Fov;
+        float targetFov = isADS ? Fov * 0.9f : Fov;
+        gunAnimator.SetBool("isADS", isADS);
         cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFov, Time.deltaTime * 10f);
         //end of ads   
+
+        //movement anim
+        if (gunAnimator != null && gunAnimator.isActiveAndEnabled)
+        {
+            gunAnimator.SetBool("isADS", isADS);
+            gunAnimator.SetBool("isMoving", isMoving);
+            gunAnimator.SetBool("isSprinting", isSprinting);
+            gunAnimator.SetBool("isSliding", isSliding);
+            Debug.Log($"isSliding: {isSliding}");
+
+        }
+        //end of movement anim
 
         //settings menu
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
@@ -186,10 +301,29 @@ public class FPSInput : MonoBehaviour
         //end of settings menu
 
         //movement
-        Vector3 movement = new Vector3(moveInput.x, 0, moveInput.y);
-        movement = transform.TransformDirection(movement);
-        movement *= speed * Time.deltaTime;
-        
+        //sliding
+        Vector3 movement;
+        if (isSliding)
+        {
+            slideTimer -= Time.deltaTime;
+            float slideSpeedCurrent = Mathf.Lerp(slideSpeed, speed, 1 - (slideTimer / slideDuration));
+            movement = slideDirection * slideSpeedCurrent * Time.deltaTime;
+
+            if (slideTimer <= 0 || playerCharacter.currentStamina <= 0)
+            {
+                isSliding = false;
+                isCrouching = true;
+            }
+        }
+        else
+        {
+            movement = new Vector3(moveInput.x, 0, moveInput.y);
+            movement = transform.TransformDirection(movement);
+            movement *= speed * Time.deltaTime;
+        }
+
+        //end of sliding
+
         if (controller.isGrounded && verticalVelocity < 0)
             verticalVelocity = -2f;  
 
@@ -216,5 +350,10 @@ public class FPSInput : MonoBehaviour
             playerCharacter.StaminaRegen();
         }
         isMoving = moveInput.magnitude > 0;
+    }
+
+    public void SetActiveAnimator(Animator animator)
+    {
+        gunAnimator = animator;
     }
 }

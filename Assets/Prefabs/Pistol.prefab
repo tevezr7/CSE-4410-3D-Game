@@ -507,6 +507,9 @@ MonoBehaviour:
   maxAmmo: 60
   damage: 20
   fireRate: 1
+  isReloading: 0
+  recoilStrength: 10
+  recoilHorizontal: 2
 --- !u!1 &8871361831873266210
 GameObject:
   m_ObjectHideFlags: 0

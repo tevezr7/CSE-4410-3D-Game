@@ -9,6 +9,9 @@ public class BaseGun : MonoBehaviour
     [SerializeField] public int maxAmmo;
     [SerializeField] public float damage;
     [SerializeField] public float fireRate;
+    [SerializeField] public bool isReloading;
+    [SerializeField] public float recoilStrength;
+    [SerializeField] public float recoilHorizontal;
 
     public bool CanShoot() => currentAmmo > 0;
 
@@ -20,10 +23,22 @@ public class BaseGun : MonoBehaviour
 
     public void Reload()
     {
+        Debug.Log("Reload called!");
         int needed = magSize - currentAmmo;
         int taken = Mathf.Min(needed, reserveAmmo);
         currentAmmo += taken;
         reserveAmmo -= taken;
+        Debug.Log($"After reload: {currentAmmo} / {reserveAmmo}");
+    }
+
+    public void OnReloadStart()
+    {
+        isReloading = true;
+    }
+
+    public void OnReloadEnd()
+    {
+        isReloading = false;
     }
 
 }

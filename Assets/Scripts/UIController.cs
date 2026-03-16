@@ -20,17 +20,17 @@ public class UIController : MonoBehaviour
     //using event system to update score when enemy is hit instead of messenger broadcast
     private void OnEnable()
     {
-        GameEvents.OnEnemyHit += OnEnemyHit;
+        GameEvents.OnEnemyKilled += OnEnemyKilled;
     }
 
     private void OnDisable()
     {
-        GameEvents.OnEnemyHit -= OnEnemyHit; 
+        GameEvents.OnEnemyKilled -= OnEnemyKilled;
     }
 
-    private void OnEnemyHit()
+    private void OnEnemyKilled()
     {
-        score += 1;
+        score += 100;
         scoreLabel.text = score.ToString();
     }
 

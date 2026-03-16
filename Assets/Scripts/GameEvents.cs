@@ -6,12 +6,12 @@ using UnityEngine.Events;
 
 public static class GameEvents
 {
-    public static event Action OnEnemyHit;
+    public static event Action OnEnemyKilled;
     public static event Action<float> OnSpeedChanged;
     
-    public static void EnemyHit()
+    public static void EnemyKilled()
     {
-        OnEnemyHit?.Invoke();
+        OnEnemyKilled?.Invoke();
     }
 
     public static void SpeedChanged(float value)

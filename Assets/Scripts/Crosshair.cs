@@ -17,6 +17,7 @@ public class Crosshair : MonoBehaviour
 
     private FPSInput input;
     private float currentSpread = 0f;
+    public float CurrentSpread => currentSpread; //expose current spread for use in hipfire spread
     private bool aimingAtEnemy = false;
     private float hitMarkerTimer = 0f;
     private Texture2D crosshairTex;
@@ -44,7 +45,8 @@ public class Crosshair : MonoBehaviour
         Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0));
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, detectRange))
+        int layerMask = ~LayerMask.GetMask("Gun", "Arms", "BulletTrail", "Player");
+        if (Physics.Raycast(ray, out hit, detectRange, layerMask))
             aimingAtEnemy = hit.collider.CompareTag("Enemy");
         else
             aimingAtEnemy = false;
@@ -66,12 +68,13 @@ public class Crosshair : MonoBehaviour
 
     private void OnGUI()
     {
-        float targetSpread = input.isADS ? 0f :
-                     input.isJumping ? dynamicSpread * 2f :
+        if (input.isADS) return;
+        float targetSpread = input.isJumping ? dynamicSpread * 2f :
                      input.isSprinting ? dynamicSpread * 1.5f :
-                     input.isCrouching ? dynamicSpread * 0.2f :
+                     input.isSliding ? dynamicSpread * 1.2f :
                      input.isMoving ? dynamicSpread * 0.8f :
-                     dynamicSpread * 0.1f;
+                     input.isCrouching ? dynamicSpread * 0.2f :
+                     dynamicSpread * 0.4f;
         currentSpread = Mathf.Lerp(currentSpread, targetSpread, Time.deltaTime * 10f);
 
         float cx = Screen.width / 2f;

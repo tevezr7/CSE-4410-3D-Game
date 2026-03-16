@@ -3,14 +3,15 @@ using UnityEngine.InputSystem;
 
 public class WeaponSwitcher : MonoBehaviour
 {
-    [SerializeField] private GameObject[] weapons;
-    private int currentWeapon = 0;
+    public GameObject[] weapons;
+    public int currentWeapon = 0;
     private RayShooter rayShooter;
 
     private void Start()
     {
-        rayShooter = GetComponent<RayShooter>();
+        rayShooter = FindFirstObjectByType<RayShooter>();
         UpdateActiveGun();
+        FindFirstObjectByType<AmmoUI>().SetActiveGun(weapons[currentWeapon].GetComponentInChildren<BaseGun>());
     }
 
     // Update is called once per frame
@@ -21,20 +22,25 @@ public class WeaponSwitcher : MonoBehaviour
         if (Keyboard.current.digit3Key.wasPressedThisFrame) SwitchTo(2);
         if (Keyboard.current.digit4Key.wasPressedThisFrame) SwitchTo(3);
         if (Keyboard.current.digit5Key.wasPressedThisFrame) SwitchTo(4);
-        if (Keyboard.current.vKey.wasPressedThisFrame || Mouse.current.backButton.wasPressedThisFrame) SwitchTo(5);
     }
 
-    private void SwitchTo(int index)
+    public void SwitchTo(int index)
     {
         if (index >= weapons.Length) return;
         weapons[currentWeapon].SetActive(false);
         currentWeapon = index;
         weapons[index].SetActive(true);
+        UpdateActiveGun(); // add this
+        FindFirstObjectByType<AmmoUI>().SetActiveGun(weapons[currentWeapon].GetComponentInChildren<BaseGun>()); // add this
     }
 
     private void UpdateActiveGun()
-    {
+    { 
         BaseGun activeGun = weapons[currentWeapon].GetComponentInChildren<BaseGun>();
         rayShooter.SetActiveGun(activeGun);
+        rayShooter.SetActiveAnimator(weapons[currentWeapon].GetComponentInChildren<Animator>());
+        FPSInput fpsInput = FindFirstObjectByType<FPSInput>();
+        fpsInput.SetActiveAnimator(weapons[currentWeapon].GetComponentInChildren<Animator>());
+        fpsInput.SetActiveGun(activeGun);
     }
 }
