@@ -6,6 +6,7 @@ public class WeaponSwitcher : MonoBehaviour
     public GameObject[] weapons;
     public int currentWeapon = 0;
     private RayShooter rayShooter;
+    public Transform muzzlePoint;
 
     private void Start()
     {
@@ -35,12 +36,23 @@ public class WeaponSwitcher : MonoBehaviour
     }
 
     private void UpdateActiveGun()
-    { 
+    {
         BaseGun activeGun = weapons[currentWeapon].GetComponentInChildren<BaseGun>();
-        rayShooter.SetActiveGun(activeGun);
-        rayShooter.SetActiveAnimator(weapons[currentWeapon].GetComponentInChildren<Animator>());
+        Animator anim = weapons[currentWeapon].GetComponentInChildren<Animator>();
         FPSInput fpsInput = FindFirstObjectByType<FPSInput>();
-        fpsInput.SetActiveAnimator(weapons[currentWeapon].GetComponentInChildren<Animator>());
-        fpsInput.SetActiveGun(activeGun);
+
+        if (anim != null)
+        {
+            rayShooter.SetActiveAnimator(anim);
+            fpsInput.SetActiveAnimator(anim);
+        }
+
+        if (activeGun != null)
+        {
+            rayShooter.SetActiveGun(activeGun);
+            rayShooter.SetMuzzlePoint(activeGun.muzzlePoint);
+            fpsInput.SetActiveGun(activeGun);
+            FindFirstObjectByType<AmmoUI>().SetActiveGun(activeGun);
+        }
     }
 }

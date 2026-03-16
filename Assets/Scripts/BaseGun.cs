@@ -2,18 +2,21 @@ using UnityEngine;
 
 public class BaseGun : MonoBehaviour
 {
-    [SerializeField] public string gunName;
-    [SerializeField] public int magSize;
-    [SerializeField] public int currentAmmo;
-    [SerializeField] public int reserveAmmo;
-    [SerializeField] public int maxAmmo;
-    [SerializeField] public float damage;
-    [SerializeField] public float fireRate;
-    [SerializeField] public bool isReloading;
-    [SerializeField] public float recoilStrength;
-    [SerializeField] public float recoilHorizontal;
+    public string gunName;
+    public int magSize;
+    public int currentAmmo;
+    public int reserveAmmo;
+    public int maxAmmo;
+    public float damage;
+    public float fireRate;
+    public bool isReloading;
+    public float recoilStrength;
+    public float recoilHorizontal;
+    public Transform muzzlePoint;
 
     public bool CanShoot() => currentAmmo > 0;
+    public enum FireMode { Single, Auto }
+    public FireMode fireMode;
 
     public void Shoot()
     {

@@ -1,7 +1,8 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using static BaseGun;
 
 public class RayShooter : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class RayShooter : MonoBehaviour
     [SerializeField] private int poolSize = 10;
     private BulletTrail[] trailPool;
     private int poolIndex = 0;
+    private float nextFireTime = 0f;
 
     void Start()
     {
@@ -46,11 +48,16 @@ public class RayShooter : MonoBehaviour
     void Update()
     {
         if (activeGun == null || !activeGun.CanShoot() || activeGun.isReloading) return;
-        if (Fire.action.WasPressedThisFrame() && !EventSystem.current.IsPointerOverGameObject()) //added check to prevent shooting, think it'll be removed soon
+        bool canFire = activeGun.fireMode == BaseGun.FireMode.Auto
+        ? Fire.action.IsPressed() : Fire.action.WasPressedThisFrame();
+
+        if (canFire && Time.time >= nextFireTime && !EventSystem.current.IsPointerOverGameObject())
         {
+
+            nextFireTime = Time.time + GetFireDelay();
+            Debug.Log($"Next fire time: {nextFireTime}, delay: {GetFireDelay()}");
             gunAnimator.SetTrigger("Fire");
-            if (activeGun == null || !activeGun.CanShoot()) return;
-            if (fpsInput.isQuickKnifing) return;
+            if (activeGun == null || !activeGun.CanShoot() || fpsInput.isQuickKnifing) return;
             activeGun.Shoot();
             recoilSystem.ApplyRecoil(activeGun.recoilStrength, activeGun.recoilHorizontal);
             crosshair.OnShoot();
@@ -62,7 +69,7 @@ public class RayShooter : MonoBehaviour
             {
                 float spread = crosshair.CurrentSpread * 0.002f;
                 shootDir += new Vector3(
-                    Random.Range(-spread * 1.25f, spread * 1.25F),
+                    Random.Range(-spread * 1.1f, spread * 1.1F),
                     Random.Range(-spread, spread),
                     0
                 );
@@ -70,28 +77,73 @@ public class RayShooter : MonoBehaviour
             }
 
             Ray spreadRay = new Ray(ray.origin, shootDir);
+            if (activeGun.gunName == "Shotgun")
+                FireShotgun(spreadRay);
+            else
+            {
+                RaycastHit hit;
+                int layerMask = ~LayerMask.GetMask("Gun", "Arms", "BulletTrail", "Player");
+                if (Physics.Raycast(spreadRay, out hit, Mathf.Infinity, layerMask))
+                {
+                    GameObject hitObject = hit.transform.gameObject;
+                    ReactiveTarget target = hitObject.GetComponentInParent<ReactiveTarget>();
+                    if (target != null)
+                    {
+                        float mult = hitObject.CompareTag("EnemyHead") ? 2f : 1f;
+                        target.ReactToHit(activeGun.damage * mult);
+                        ZombieAI zombie = hitObject.GetComponentInParent<ZombieAI>();
+                        if (zombie != null) zombie.TriggerAggro();
+                        crosshair.ShowHitMarker(); //shows hit marker on crosshair when enemy is hit
+
+                        GameObject blood = Instantiate(bloodSplatterPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                        Destroy(blood, 0.5f);
+                    }
+                }
+
+                Vector3 endPoint = hit.collider != null ? hit.point : spreadRay.GetPoint(100f);
+                BulletTrail trail = GetTrail();
+                trail.SpawnTrail(muzzlePoint.position, endPoint);
+            }
+        }
+    }
+
+    private void FireShotgun(Ray ray)
+    {
+        int pelletCount = 8;
+        float pelletSpread = 0.2f;
+
+        for (int i = 0; i < pelletCount; i++)
+        {
+            Vector3 pelletDir = ray.direction + new Vector3(
+                Random.Range(-pelletSpread, pelletSpread),
+                Random.Range(-pelletSpread, pelletSpread),
+                0
+            );
+            pelletDir.Normalize();
+
+            Ray pelletRay = new Ray(ray.origin, pelletDir);
             RaycastHit hit;
             int layerMask = ~LayerMask.GetMask("Gun", "Arms", "BulletTrail", "Player");
-            if (Physics.Raycast(spreadRay, out hit, Mathf.Infinity, layerMask))
+
+            if (Physics.Raycast(pelletRay, out hit, Mathf.Infinity, layerMask))
             {
                 GameObject hitObject = hit.transform.gameObject;
                 ReactiveTarget target = hitObject.GetComponentInParent<ReactiveTarget>();
                 if (target != null)
                 {
                     float mult = hitObject.CompareTag("EnemyHead") ? 2f : 1f;
-                    target.ReactToHit(activeGun.damage * mult);
+                    target.ReactToHit((activeGun.damage) * mult);
                     ZombieAI zombie = hitObject.GetComponentInParent<ZombieAI>();
                     if (zombie != null) zombie.TriggerAggro();
-                    crosshair.ShowHitMarker(); //shows hit marker on crosshair when enemy is hit
-
+                    crosshair.ShowHitMarker();
                     GameObject blood = Instantiate(bloodSplatterPrefab, hit.point, Quaternion.LookRotation(hit.normal));
                     Destroy(blood, 0.5f);
                 }
-            }
 
-            Vector3 endPoint = hit.collider != null ? hit.point : spreadRay.GetPoint(100f);
-            BulletTrail trail = GetTrail();
-            trail.SpawnTrail(muzzlePoint.position, endPoint);
+                Vector3 endPoint = hit.collider != null ? hit.point : pelletRay.GetPoint(100f);
+                BulletTrail trail = GetTrail();
+                trail.SpawnTrail(muzzlePoint.position, endPoint);
+            }
         }
     }
 
@@ -111,6 +163,23 @@ public class RayShooter : MonoBehaviour
     public void SetActiveAnimator(Animator animator)
     {
         gunAnimator = animator;
+    }
+
+    public void SetMuzzlePoint(Transform muzzle)
+    {
+        muzzlePoint = muzzle;
+    }
+
+    private float GetFireDelay()
+    {
+        if (activeGun.fireMode == FireMode.Auto)
+            return 60f / activeGun.fireRate; // fireRate = RPM, e.g. 600 RPM = 0.1s between shots
+        else
+        {
+            if (activeGun.fireRate == 0f) return 2f;   // slow single fire
+            if (activeGun.fireRate == 1f) return 0.5f; // medium single fire
+            return 0f;                                   // uncapped single fire
+        }
     }
 
 }

@@ -102,10 +102,10 @@ public class FPSInput : MonoBehaviour
     public void OnReload(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
+        if (isSprinting) return;
         if (activeGun == null) return;
         if (activeGun.currentAmmo == activeGun.magSize) return;
         if (activeGun.reserveAmmo <= 0) return;
-        isSprinting = false; //force stop sprinting when reloading
         gunAnimator.ResetTrigger("Reload");
         gunAnimator.SetTrigger("Reload");
 
