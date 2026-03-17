@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 056f80bd3e877184dbb69881bb4be8c6
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 25015
+  packageName: Simple Sci-Fi Turret
+  packageVersion: 1.0
+  assetPath: Assets/SimpleTurret/Example.unity
+  uploadId: 42137

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 209a7fe0ffb83614d91a7658db0b1dcb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 25015
+  packageName: Simple Sci-Fi Turret
+  packageVersion: 1.0
+  assetPath: Assets/SimpleTurret/Prefab/SimpleSciFiTurret.prefab
+  uploadId: 42137

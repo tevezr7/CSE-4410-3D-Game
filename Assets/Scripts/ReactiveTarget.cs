@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -10,9 +11,7 @@ public class ReactiveTarget : MonoBehaviour
 
     [SerializeField] private GameObject deathSmokePrefab;
 
-
-    //added enemy health system, that way they dont just die in one hit! variable damage so that in the future, multiple weapon types can be added. :D
-
+    public event Action<ReactiveTarget> OnDeath;
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -52,6 +51,7 @@ public class ReactiveTarget : MonoBehaviour
         yield return new WaitForSeconds(2f);
         if (deathSmokePrefab != null)
             Instantiate(deathSmokePrefab, transform.position, Quaternion.identity);
+        OnDeath?.Invoke(this);
         Destroy(gameObject);
     }
 

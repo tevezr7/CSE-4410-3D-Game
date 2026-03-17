@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,19 +10,20 @@ public class ZombieAI : MonoBehaviour
     public LayerMask whatIsPlayer;
     private Animator anim;
 
-    [Header("Ranges")]
     public float aggroRange = 8f;
     public float attackRange = 2f;
     public float damage = 10f;
     public float timeBetweenAttacks = 1.5f;
     private bool alreadyAttacked;
 
-    [Header("Movement")]
     [SerializeField] private float chaseSpeed = 5f;
     [SerializeField] private float closeRangeSpeed = 4.5f;
 
     private bool isAggroed = false;
     public Transform currentTarget;
+    public static List<ZombieAI> allZombies = new List<ZombieAI>();
+    private void OnEnable() { allZombies.Add(this); }
+    private void OnDisable() { allZombies.Remove(this); }
 
     private void Awake()
     {

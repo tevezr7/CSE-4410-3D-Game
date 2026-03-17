@@ -45,6 +45,9 @@ public class FPSInput : MonoBehaviour
     public bool isReloading = false;
     public bool isSliding = false;
     public bool isQuickKnifing = false;
+    public bool isThrowingGrenade = false;
+
+    public GameObject grenadePrefab;
 
     private int previousWeapon = 0;
 
@@ -83,6 +86,7 @@ public class FPSInput : MonoBehaviour
 
     public void OnSprint(InputAction.CallbackContext context)
     {
+        if (isReloading) return;
         if (context.performed)
         {
             if(playerCharacter != null && playerCharacter.currentStamina <= 0)
@@ -106,6 +110,7 @@ public class FPSInput : MonoBehaviour
         if (activeGun == null) return;
         if (activeGun.currentAmmo == activeGun.magSize) return;
         if (activeGun.reserveAmmo <= 0) return;
+        isSprinting = false;
         gunAnimator.ResetTrigger("Reload");
         gunAnimator.SetTrigger("Reload");
 
@@ -221,6 +226,31 @@ public class FPSInput : MonoBehaviour
         
     }
 
+    /*public void OnGrenade(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (isThrowingGrenade) return;
+        if (isQuickKnifing) return;
+        if (activeGun != null && activeGun.isReloading) return;
+        StartCoroutine(ThrowGrenade());
+    }
+
+    private IEnumerator ThrowGrenade()
+    {
+        isThrowingGrenade = true;
+        previousWeapon = weaponSwitcher.currentWeapon;
+        weaponSwitcher.SwitchTo(6);
+        yield return new WaitForSeconds(0.3f);
+        GameObject grenadeObj = Instantiate(grenadePrefab,
+            cam.transform.position + cam.transform.forward,
+            Quaternion.identity);
+        Grenade grenade = grenadeObj.GetComponent<Grenade>();
+        if (grenade != null) grenade.Throw();
+        yield return new WaitForSeconds(0.3f);
+        weaponSwitcher.SwitchTo(previousWeapon);
+        isThrowingGrenade = false;
+    }*/ //will do tmr
+
     public void OnRightLean(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
@@ -279,8 +309,7 @@ public class FPSInput : MonoBehaviour
             gunAnimator.SetBool("isMoving", isMoving);
             gunAnimator.SetBool("isSprinting", isSprinting);
             gunAnimator.SetBool("isSliding", isSliding);
-            Debug.Log($"isSliding: {isSliding}");
-
+            gunAnimator.SetBool("isReloading", activeGun != null && activeGun.isReloading);
         }
         //end of movement anim
 
