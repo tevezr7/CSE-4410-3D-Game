@@ -5,10 +5,13 @@ using UnityEngine.Events;
 
 public class UIController : MonoBehaviour
 {
-    [SerializeField] TMP_Text scoreLabel;
+    // SEB EDITED (changed [SerializedField] to public for shop. DELETE IF NEEDED
+    public TMP_Text scoreLabel;
+    // SEB END
     [SerializeField] SettingsPopup settingsPopup;
 
-    private int score = 0;
+    public int score = 0;
+    public int kills = 0;
 
     // Update is called once per frame
 
@@ -30,23 +33,24 @@ public class UIController : MonoBehaviour
 
     private void OnEnemyKilled()
     {
-        score += 100;
+        score += 100; // will change in future with if statement for special zombies
+        kills += 1;
         scoreLabel.text = score.ToString();
     }
 
 
+    // SEB ADDED. DELETE IF NEEDED
+    // private void Start()
+    // {
+        // score = 0;
+        // scoreLabel.text = score.ToString();
 
-    private void Start()
-    {
-        score = 0;
-        scoreLabel.text = score.ToString();
+        // settingsPopup.Close();
+    // }
 
-        settingsPopup.Close();
-    }
-
-    public void OnOpenSettings()
-    {
+    // public void OnOpenSettings()
+    // {
         //Debug.Log("Opening Settings...");
-        settingsPopup.Open();
-    }
+        // settingsPopup.Open();
+    // }
 }

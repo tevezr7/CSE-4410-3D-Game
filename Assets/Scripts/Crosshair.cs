@@ -69,6 +69,7 @@ public class Crosshair : MonoBehaviour
     private void OnGUI()
     {
         if (input.isADS) return;
+        if (Time.timeScale == 0f) return;
         float targetSpread = input.isJumping ? dynamicSpread * 2f :
                      input.isSprinting ? dynamicSpread * 1.5f :
                      input.isSliding ? dynamicSpread * 1.2f :

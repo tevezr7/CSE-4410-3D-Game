@@ -285,19 +285,21 @@ public class FPSInput : MonoBehaviour
         //end of movement anim
 
         //settings menu
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            if (settingsPopup.gameObject.activeSelf)
-            {
-                settingsPopup.Close();
-                Time.timeScale = 1f; //unpause game when closing settings
-            }
-            else
-            {
-                settingsPopup.Open();
-                Time.timeScale = 0f; //pause game when opening settings
-            }
-        }
+
+        // if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        // {
+            // if (settingsPopup.gameObject.activeSelf)
+            // {
+                // settingsPopup.Close();
+                // Time.timeScale = 1f; //unpause game when closing settings
+            // }
+            // else
+            // {
+                // settingsPopup.Open();
+                // Time.timeScale = 0f; //pause game when opening settings
+            // }
+        // }
+
         //end of settings menu
 
         //movement
