@@ -13,6 +13,9 @@ public class BaseGun : MonoBehaviour
     public float recoilStrength;
     public float recoilHorizontal;
     public Transform muzzlePoint;
+    // SEB ADDED (For gun sounds), DELETE IF NEEDED
+    public GunAudio gunAudio;
+    // SEB END
 
     public bool CanShoot() => currentAmmo > 0;
     public enum FireMode { Single, Auto }
@@ -20,8 +23,18 @@ public class BaseGun : MonoBehaviour
 
     public void Shoot()
     {
-        if (!CanShoot()) return;
-        currentAmmo--;
+        // SEB EDITED, EDIT IF NEEDED
+        if (!CanShoot())
+        {
+            //Play empty click when trying to fire with no ammo
+            if (gunAudio != null) gunAudio.PlayEmptyClick();
+            return;
+        }
+            currentAmmo--;
+        // Play fire sound
+        if (gunAudio != null) gunAudio.PlayFireSound();
+        // SEB END
+   
     }
 
     public void Reload()
@@ -36,7 +49,11 @@ public class BaseGun : MonoBehaviour
 
     public void OnReloadStart()
     {
+        // SEB EDIT
         isReloading = true;
+        // Play reload sound
+        if (gunAudio != null) gunAudio.PlayReloadSound();
+        // SEB END
     }
 
     public void OnReloadEnd()

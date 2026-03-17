@@ -1,8 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class MouseLook : MonoBehaviour
 {
+    // SEB ADDED. DELETE IF NEEDED (Added to make FPSInput Public)
+    public FPSInput fpsInput;
+    // SEB END
+
     public RotationAxes axes = RotationAxes.MouseXAndY;
     public float sensitivityHor = 9.0f;
     public float sensitivityVert = 9.0f;
@@ -34,9 +39,9 @@ public class MouseLook : MonoBehaviour
     }
     void Update()
     {
-        //SEBASTIAN ADDED CAN DELETE IF NEEDED
+        // SEB ADDED CAN DELETE IF NEEDED
         if (Time.timeScale == 0f) return;
-        //SEB END
+        // SEB END
 
         if (axes == RotationAxes.MouseX)
         {
@@ -47,7 +52,9 @@ public class MouseLook : MonoBehaviour
             verticalRot -= sensitivityVert * lookInput.y;
             verticalRot = Mathf.Clamp(verticalRot, minimumVert, maximumVert);
             float horizontalRot = 0;
-            transform.localEulerAngles = new Vector3(verticalRot, horizontalRot, 0);
+            // SEB ADDED. CAN DELETE IF NEEDED (0 at the end was changed to fpsInput != null? fpsInput.currentLeanAngle : 0)
+            transform.localEulerAngles = new Vector3(verticalRot, horizontalRot, fpsInput != null ? fpsInput.currentLeanAngle : 0);
+            // SEB END
         }
         else
         {
