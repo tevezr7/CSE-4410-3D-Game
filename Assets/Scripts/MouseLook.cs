@@ -34,6 +34,10 @@ public class MouseLook : MonoBehaviour
     }
     void Update()
     {
+        //SEBASTIAN ADDED CAN DELETE IF NEEDED
+        if (Time.timeScale == 0f) return;
+        //SEB END
+
         if (axes == RotationAxes.MouseX)
         {
             transform.Rotate(0, sensitivityHor * lookInput.x, 0);
