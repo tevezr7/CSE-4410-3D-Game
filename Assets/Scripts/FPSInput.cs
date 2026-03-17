@@ -24,7 +24,9 @@ public class FPSInput : MonoBehaviour
     public float jumpForce = 5.0f;
     private float verticalVelocity = 0f;
     private float targetLeanAngle = 0f;
-    private float currentLeanAngle = 0f;
+    // SEB CHANGED. (private -> public)
+    public float currentLeanAngle = 0f;
+    // SEB END
     private float targetLeanOffset = 0f;
     private float currentLeanOffset = 0f;
     private int leanDirection = 0;
@@ -271,7 +273,9 @@ public class FPSInput : MonoBehaviour
         targetLeanAngle = leanDirection * -15f;
         targetLeanOffset = leanDirection * 0.5f;
         currentLeanOffset = Mathf.Lerp(currentLeanOffset, targetLeanOffset, Time.deltaTime * 10f); 
-        cam.transform.localPosition = new Vector3(currentLeanOffset, cam.transform.localPosition.y, cam.transform.localPosition.z);
+        // SEB ADDED. (Commented out for bug, Delete if needed)
+        // cam.transform.localPosition = new Vector3(currentLeanOffset, cam.transform.localPosition.y, cam.transform.localPosition.z);
+        // SEB END
         currentLeanAngle = Mathf.LerpAngle(currentLeanAngle, targetLeanAngle, Time.deltaTime * 10f);
         cam.transform.localEulerAngles = new Vector3(
             cam.transform.localEulerAngles.x,
@@ -305,11 +309,12 @@ public class FPSInput : MonoBehaviour
         //movement anim
         if (gunAnimator != null && gunAnimator.isActiveAndEnabled)
         {
-            gunAnimator.SetBool("isADS", isADS);
-            gunAnimator.SetBool("isMoving", isMoving);
-            gunAnimator.SetBool("isSprinting", isSprinting);
-            gunAnimator.SetBool("isSliding", isSliding);
-            gunAnimator.SetBool("isReloading", activeGun != null && activeGun.isReloading);
+                gunAnimator.SetBool("isADS", isADS);
+                gunAnimator.SetBool("isMoving", isMoving);
+                gunAnimator.SetBool("isSprinting", isSprinting);
+                gunAnimator.SetBool("isSliding", isSliding);
+                gunAnimator.SetBool("isReloading", activeGun != null && activeGun.isReloading);
+
         }
         //end of movement anim
 
