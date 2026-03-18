@@ -5,7 +5,7 @@ public class Specimen : MonoBehaviour
 {
     public float health = 100f;
     public float maxHealth = 100f;
-    private Specimen specimen;
+    public DeathScreen deathscreen;
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] Slider healthBar;
 
@@ -18,20 +18,24 @@ public class Specimen : MonoBehaviour
     private void GameOver()
     {
         health = 0;
+        UIController ui = FindFirstObjectByType<UIController>();
+        int score = 0;
+        int kills = 0;
+        if (ui != null)
+        {
+            score = ui.score;
+            kills = ui.kills;
+        }
+        if (deathscreen != null)
+            deathscreen.ShowDeathScreen(score, kills);
+        else
+            Debug.LogWarning("DeathScreen not assigned");
         Time.timeScale = 0f;
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        specimen = FindFirstObjectByType<Specimen>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        healthBar.value = specimen.health / specimen.maxHealth;
+        healthBar.value = health / maxHealth;
     }
 }

@@ -33,11 +33,12 @@ public class TowerPlacer : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale == 0f) return;
         if (Keyboard.current.tKey.wasPressedThisFrame) TrySelect(TowerType.Turret);
         if (Keyboard.current.zKey.wasPressedThisFrame) TrySelect(TowerType.Mine);
         if (Keyboard.current.xKey.wasPressedThisFrame) TrySelect(TowerType.BarbedWire);
 
-        if(Keyboard.current.escapeKey.wasPressedThisFrame) CancelPlacement();
+        if (Keyboard.current.escapeKey.wasPressedThisFrame) CancelPlacement();
 
         if (!isPlacing) return;
 
@@ -64,6 +65,15 @@ public class TowerPlacer : MonoBehaviour
         selectedType = type;
         ghostObject = Instantiate(GetPrefab(type));
 
+        TurretAI ai = ghostObject.GetComponent<TurretAI>();
+        if (ai != null) ai.enabled = false;
+
+        Mine mine = ghostObject.GetComponent<Mine>();
+        if (mine != null) mine.enabled = false;
+
+        BarbedWire barbed = ghostObject.GetComponent<BarbedWire>();
+        if (barbed != null) barbed.enabled = false;
+
         foreach (Collider c in ghostObject.GetComponentsInChildren<Collider>())
         {
             c.enabled = false;
@@ -78,7 +88,7 @@ public class TowerPlacer : MonoBehaviour
         Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0));
         int mask = ~LayerMask.GetMask("Player", "Gun", "Arms", "BulletTrail");
 
-        if(Physics.Raycast(ray, out RaycastHit hit, maxPlacementRange, mask))
+        if (Physics.Raycast(ray, out RaycastHit hit, maxPlacementRange, mask))
         {
             bool flatSurface = Vector3.Angle(hit.normal, Vector3.up) < 30f;
             bool spaceClear = !Physics.SphereCast(

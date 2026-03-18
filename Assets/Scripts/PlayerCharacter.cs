@@ -10,6 +10,9 @@ public class PlayerCharacter : MonoBehaviour
     private float staminaCost = 10;
     private float staminaRegen = 5;
 
+    [SerializeField] private AudioClip hurtSound;
+    [SerializeField] private AudioSource audioSource;
+
     //SEB ADDED. DELETE IF NEEDED
     public DeathScreen deathscreen;
     //end
@@ -30,6 +33,8 @@ public class PlayerCharacter : MonoBehaviour
     public void Hurt(float damage)
     {
         currentHealth -= damage;
+        if (audioSource != null && hurtSound != null)
+            audioSource.PlayOneShot(hurtSound);
         if (currentHealth <= 0)
         {
             currentHealth = 0;
@@ -74,14 +79,14 @@ public class PlayerCharacter : MonoBehaviour
     }
         //SEB END
 
-            public void StaminaDrain()
-            {
-                currentStamina -= staminaCost * Time.deltaTime;
-                if (currentStamina < 0)
-                {
-                    currentStamina = 0;
-                }
-            }
+    public void StaminaDrain()
+    {
+        currentStamina -= staminaCost * Time.deltaTime;
+        if (currentStamina < 0)
+        {
+            currentStamina = 0;
+        }
+    }
 
     public void StaminaRegen()
     {

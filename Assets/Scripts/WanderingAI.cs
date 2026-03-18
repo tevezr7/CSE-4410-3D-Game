@@ -5,6 +5,7 @@ public class WanderingAI : MonoBehaviour
 {
     [SerializeField] GameObject fireballPrefab;
     private GameObject fireball;
+    private Animator anim;
 
     public float speed = 3.0f;
     public float obstacleRange = 5.0f;    
@@ -30,10 +31,13 @@ public class WanderingAI : MonoBehaviour
     private void Start()
     {
         isAlive = true;
+        anim = GetComponent<Animator>();
     }
 
     void Update()
     {
+        if (anim)
+            anim.SetBool("isWalking", isAlive);
         if (isAlive)
         {
             transform.Translate(0, 0, speed * Time.deltaTime);

@@ -8,9 +8,14 @@ public class Explode : MonoBehaviour
     public LayerMask damageLayer;
     public GameObject explosionEffectPrefab;
 
+    [SerializeField] private AudioClip explosionSound;
+    [SerializeField] private AudioSource audioSource;
+
     public void Explosion()
     {
-        if(explosionEffectPrefab != null)
+        if (audioSource != null && explosionSound != null)
+            audioSource.PlayOneShot(explosionSound);
+        if (explosionEffectPrefab != null)
         {
             Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
         }
@@ -27,7 +32,7 @@ public class Explode : MonoBehaviour
             }
         }
 
-        Destroy(gameObject);
+        Destroy(gameObject, 1f);
     }
 
 

@@ -15,6 +15,7 @@ public class FPSInput : MonoBehaviour
     private BaseGun activeGun;
     private WeaponSwitcher weaponSwitcher;
     private MeleeAttack knife;
+    private GunAudio gunAudio;
 
     private Vector2 moveInput;
     public const float baseSpeed = 5f;
@@ -24,9 +25,7 @@ public class FPSInput : MonoBehaviour
     public float jumpForce = 5.0f;
     private float verticalVelocity = 0f;
     private float targetLeanAngle = 0f;
-    // SEB CHANGED. (private -> public)
-    public float currentLeanAngle = 0f;
-    // SEB END
+    public float currentLeanAngle = 0f; //
     private float targetLeanOffset = 0f;
     private float currentLeanOffset = 0f;
     private int leanDirection = 0;
@@ -50,7 +49,7 @@ public class FPSInput : MonoBehaviour
     public bool isThrowingGrenade = false;
 
     public GameObject grenadePrefab;
-
+    public int grenadeCount = 1;
     private int previousWeapon = 0;
 
     private void OnEnable()
@@ -139,6 +138,8 @@ public class FPSInput : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         knife = weaponSwitcher.weapons[5].GetComponent<MeleeAttack>();
         if (knife != null) knife.Slash();
+        GunAudio knifeAudio = weaponSwitcher.weapons[5].GetComponentInChildren<GunAudio>();
+        if (knifeAudio != null) knifeAudio.PlayKnifeSwipe();
         yield return new WaitForSeconds(0.3f);
         if (gunAnimator != null)
         {
@@ -228,11 +229,12 @@ public class FPSInput : MonoBehaviour
         
     }
 
-    /*public void OnGrenade(InputAction.CallbackContext context)
+    public void OnGrenade(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
         if (isThrowingGrenade) return;
         if (isQuickKnifing) return;
+        if (grenadeCount <= 0) return;
         if (activeGun != null && activeGun.isReloading) return;
         StartCoroutine(ThrowGrenade());
     }
@@ -240,18 +242,23 @@ public class FPSInput : MonoBehaviour
     private IEnumerator ThrowGrenade()
     {
         isThrowingGrenade = true;
+        grenadeCount--;
         previousWeapon = weaponSwitcher.currentWeapon;
         weaponSwitcher.SwitchTo(6);
-        yield return new WaitForSeconds(0.3f);
-        GameObject grenadeObj = Instantiate(grenadePrefab,
-            cam.transform.position + cam.transform.forward,
-            Quaternion.identity);
+        gunAnimator.SetTrigger("Throw");
+        yield return new WaitForSeconds(0.4f);
+        GameObject grenadeObj = Instantiate(
+            grenadePrefab,
+            cam.transform.position + cam.transform.forward * 1.5f,
+            cam.transform.rotation  // use camera rotation instead of identity
+        ); 
         Grenade grenade = grenadeObj.GetComponent<Grenade>();
+        yield return null; // wait one frame
         if (grenade != null) grenade.Throw();
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.4f);
         weaponSwitcher.SwitchTo(previousWeapon);
         isThrowingGrenade = false;
-    }*/ //will do tmr
+    } //will do tmr
 
     public void OnRightLean(InputAction.CallbackContext context)
     {
@@ -273,9 +280,6 @@ public class FPSInput : MonoBehaviour
         targetLeanAngle = leanDirection * -15f;
         targetLeanOffset = leanDirection * 0.5f;
         currentLeanOffset = Mathf.Lerp(currentLeanOffset, targetLeanOffset, Time.deltaTime * 10f); 
-        // SEB ADDED. (Commented out for bug, Delete if needed)
-        // cam.transform.localPosition = new Vector3(currentLeanOffset, cam.transform.localPosition.y, cam.transform.localPosition.z);
-        // SEB END
         currentLeanAngle = Mathf.LerpAngle(currentLeanAngle, targetLeanAngle, Time.deltaTime * 10f);
         cam.transform.localEulerAngles = new Vector3(
             cam.transform.localEulerAngles.x,
