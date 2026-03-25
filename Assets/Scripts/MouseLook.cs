@@ -36,6 +36,8 @@ public class MouseLook : MonoBehaviour
         {
             body.freezeRotation = true;
         }
+        fpsInput = GetComponentInParent<FPSInput>();
+
     }
     void Update()
     {

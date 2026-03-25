@@ -18,6 +18,7 @@ public class ZombieAI : MonoBehaviour
 
     [SerializeField] private float chaseSpeed = 5f;
     [SerializeField] private float closeRangeSpeed = 4.5f;
+    public float speedModifier = 1f;
 
     private bool isAggroed = false;
     public Transform currentTarget;
@@ -84,7 +85,7 @@ public class ZombieAI : MonoBehaviour
     private void ChaseTarget()
     {
         agent.isStopped = false;
-        agent.speed = chaseSpeed;
+        agent.speed = chaseSpeed * speedModifier;
         agent.stoppingDistance = attackRange - 0.1f;
         agent.SetDestination(currentTarget.position);
 

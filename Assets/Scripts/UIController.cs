@@ -39,18 +39,12 @@ public class UIController : MonoBehaviour
     }
 
 
-    // SEB ADDED. DELETE IF NEEDED
-    // private void Start()
-    // {
-        // score = 0;
-        // scoreLabel.text = score.ToString();
+    private void Start()
+    {
+        score = 0;
+        scoreLabel.text = score.ToString();
 
-        // settingsPopup.Close();
-    // }
+    }
 
-    // public void OnOpenSettings()
-    // {
-        //Debug.Log("Opening Settings...");
-        // settingsPopup.Open();
-    // }
+
 }

@@ -12,6 +12,7 @@ public class ShopUI : MonoBehaviour
     [Header("UI Panels")]
     public GameObject shopPanel;
     public GameObject promptUI;       // "Press F to open shop" prompt
+    public GameObject victoryPanel;
 
     [Header("Prompt")]
     public TextMeshProUGUI promptText;
@@ -33,9 +34,15 @@ public class ShopUI : MonoBehaviour
     public int smgPrice = 400;
     public int shotgunPrice = 600;
     public int sniperPrice = 800;
-    public int trapPrice = 300;
+    public int barbedPrice = 300;
+    public int minePrice = 700;
+    public int turretPrice = 800;
     public int healthUpgradePrice = 700;
-    public int specimenPotionPrice = 1000;
+    public int healthPrice = 1000;
+    public int grenadePrice = 200;
+    public int pistolPrice = 150;
+    public int winPrice = 9999;
+
 
     [Header("Health Upgrade Settings")]
     public float healthUpgradeAmount = 25f;
@@ -45,16 +52,29 @@ public class ShopUI : MonoBehaviour
     public TextMeshProUGUI smgStatusText;
     public TextMeshProUGUI shotgunStatusText;
     public TextMeshProUGUI sniperStatusText;
-    public TextMeshProUGUI trapStatusText;
+    public TextMeshProUGUI turretStatusText;
+    public TextMeshProUGUI barbedStatusText;
+    public TextMeshProUGUI mineStatusText;
     public TextMeshProUGUI healthUpgradeStatusText;
-    public TextMeshProUGUI specimenStatusText;
+    public TextMeshProUGUI healthStatusText;
+    public TextMeshProUGUI grenadeStatusText;
+    public TextMeshProUGUI pistolStatusText;
+    public TextMeshProUGUI winStatusText;
+
+    [Header("Misc")]
+    public int grenadeMax = 5;
 
     // Track what has been purchased
     private bool arPurchased = false;
     private bool smgPurchased = false;
     private bool shotgunPurchased = false;
     private bool sniperPurchased = false;
-    private bool specimenPotionPurchased = false;
+    private bool pistolPurchased = true; // starts with pistol  
+
+    private FPSInput fpsInput;
+    private WeaponSwitcher weaponSwitcher;
+    private TowerPlacer towerPlacer;
+    private VictoryScreen victoryScreen;
 
     private bool isOpen = false;
     private bool playerInRange = false;
@@ -65,6 +85,10 @@ public class ShopUI : MonoBehaviour
     {
         shopPanel.SetActive(false);
         promptUI.SetActive(false);
+        fpsInput = FindFirstObjectByType<FPSInput>();
+        weaponSwitcher = FindFirstObjectByType<WeaponSwitcher>();
+        towerPlacer = FindFirstObjectByType<TowerPlacer>();
+        victoryScreen = FindFirstObjectByType<VictoryScreen>();
     }
 
     void Update()
@@ -149,82 +173,231 @@ public class ShopUI : MonoBehaviour
 
     void RefreshShopUI()
     {
-        UpdateStatus(arStatusText, arPurchased, arPrice);
-        UpdateStatus(smgStatusText, smgPurchased, smgPrice);
-        UpdateStatus(shotgunStatusText, shotgunPurchased, shotgunPrice);
-        UpdateStatus(sniperStatusText, sniperPurchased, sniperPrice);
-        UpdateStatus(specimenStatusText, specimenPotionPurchased, specimenPotionPrice);
+        BaseGun arGun = arWeapon?.GetComponentInChildren<BaseGun>();
+        BaseGun smgGun = smgWeapon?.GetComponentInChildren<BaseGun>();
+        BaseGun shotgunGun = shotgunWeapon?.GetComponentInChildren<BaseGun>();
+        BaseGun sniperGun = sniperWeapon?.GetComponentInChildren<BaseGun>();
+        BaseGun pistolGun = weaponSwitcher.weapons[0].GetComponentInChildren<BaseGun>();
+        UpdateStatus(arStatusText, arPurchased, arPrice, arGun);
+        UpdateStatus(smgStatusText, smgPurchased, smgPrice, smgGun);
+        UpdateStatus(shotgunStatusText, shotgunPurchased, shotgunPrice, shotgunGun);
+        UpdateStatus(sniperStatusText, sniperPurchased, sniperPrice, sniperGun);
+        UpdateStatus(pistolStatusText, pistolPurchased, pistolPrice, pistolGun);
 
         // Traps and health upgrades can be bought multiple times
-        if (trapStatusText != null)
-            trapStatusText.text = "Cost: " + trapPrice + " pts";
+        if (healthStatusText != null)
+            healthStatusText.text = playerCharacter.currentHealth >= playerCharacter.maxHealth ? "FULL" : "Cost: " + healthPrice + " pts  |  " + playerCharacter.currentHealth + "/" + playerCharacter.maxHealth;
+        if (winStatusText != null)
+            winStatusText.text = "Cost: " + winPrice + " pts  |  Ends the game with a victory";
+        if (barbedStatusText != null)
+            barbedStatusText.text = "Cost: " + barbedPrice + " pts";
+        if (mineStatusText != null)
+            mineStatusText.text = "Cost: " + minePrice + " pts";
+        if (turretStatusText != null)
+            turretStatusText.text = "Cost: " + turretPrice + " pts";
         if (healthUpgradeStatusText != null)
             healthUpgradeStatusText.text = "Cost: " + healthUpgradePrice + " pts  |  +" + healthUpgradeAmount + " Max HP";
+        if (grenadeStatusText != null)
+            grenadeStatusText.text = fpsInput.grenadeCount >= grenadeMax ? "MAX" : "Cost: " + grenadePrice + " pts  |  " + fpsInput.grenadeCount + "/" + grenadeMax;
     }
 
-    void UpdateStatus(TextMeshProUGUI statusText, bool purchased, int price)
+    void UpdateStatus(TextMeshProUGUI statusText, bool purchased, int price, BaseGun gun)
     {
         if (statusText == null) return;
-        statusText.text = purchased ? "OWNED" : "Cost: " + price + " pts";
+        if (!purchased) { statusText.text = "Cost: " + price + " pts"; return; }
+        if (gun == null) { statusText.text = "OWNED"; return; }
+        if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
+            statusText.text = "FULL";
+        else
+            statusText.text = "Refill: " + price + " pts  |  " + gun.currentAmmo + "/" + gun.reserveAmmo;
     }
 
     //  Purchase Methods (called by buttons) 
+    public void BuyWin()
+    {
+        if (!CanAfford(winPrice)) return;
+        Time.timeScale = 0f;
+        UIController ui = FindFirstObjectByType<UIController>();
+        int score = ui?.score ?? 0;
+        int kills = ui?.kills ?? 0;
+        FPSInput fpsInput = FindFirstObjectByType<FPSInput>();
+        if (fpsInput != null) fpsInput.enabled = false;
+        Crosshair crosshair = FindFirstObjectByType<Crosshair>();
+        if (crosshair != null) crosshair.enabled = false;
+        CloseShop();
+        if (victoryScreen != null)
+            victoryScreen.ShowVictoryScreen(score, kills);
+    }
+    public void BuyGrenade()
+    {
+        if (fpsInput.grenadeCount >= grenadeMax) { ShowMessage("Max grenades!"); return; }
+        if (!CanAfford(grenadePrice)) return;
+        DeductScore(grenadePrice);
+        fpsInput.grenadeCount++;
+        ShowMessage("Grenade purchased!");
+        RefreshShopUI();
+    }
 
+    public void BuyPistolAmmo()
+    {
+        BaseGun gun = weaponSwitcher.weapons[0].GetComponentInChildren<BaseGun>();
+        if (gun == null) return;
+        if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
+        {
+            ShowMessage("Ammo is full!"); return;
+        }
+        if (!CanAfford(pistolPrice)) return;
+        DeductScore(pistolPrice);
+        gun.reserveAmmo = gun.maxAmmo;
+        gun.currentAmmo = gun.magSize;
+        ShowMessage("Pistol ammo refilled!");
+        RefreshShopUI();
+    }
     public void BuyAR()
     {
-        if (arPurchased) { ShowMessage("Already owned!"); return; }
-        if (!CanAfford(arPrice)) return;
-
-        DeductScore(arPrice);
-        arPurchased = true;
-        if (arWeapon != null) arWeapon.SetActive(true);
-        ShowMessage("AR purchased!");
+        Debug.Log($"BuyAR called | arPurchased: {arPurchased} | score: {uiController.score} | arPrice: {arPrice}");
+        if (!arPurchased)
+        {
+            // first purchase — unlock it
+            if (!CanAfford(arPrice)) return;
+            DeductScore(arPrice);
+            arPurchased = true;
+            weaponSwitcher.weaponUnlocked[1] = true;
+            arWeapon.SetActive(false); // let WeaponSwitcher handle active state
+            ShowMessage("AR unlocked!");
+        }
+        else
+        {
+            // already owned — check if refill is needed
+            BaseGun gun = arWeapon.GetComponentInChildren<BaseGun>();
+            if (gun == null) return;
+            if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
+            {
+                ShowMessage("Ammo is full!"); return;
+            }
+            if (!CanAfford(arPrice)) return;
+            DeductScore(arPrice);
+            gun.reserveAmmo = gun.maxAmmo;
+            gun.currentAmmo = gun.magSize;
+            ShowMessage("AR ammo refilled!");
+        }
         RefreshShopUI();
     }
 
     public void BuySMG()
     {
-        if (smgPurchased) { ShowMessage("Already owned!"); return; }
-        if (!CanAfford(smgPrice)) return;
-
-        DeductScore(smgPrice);
-        smgPurchased = true;
-        if (smgWeapon != null) smgWeapon.SetActive(true);
-        ShowMessage("SMG purchased!");
+        if(!smgPurchased)
+        {
+            // first purchase — unlock it
+            if (!CanAfford(smgPrice)) return;
+            DeductScore(smgPrice);
+            smgPurchased = true;
+            weaponSwitcher.weaponUnlocked[2] = true;
+            smgWeapon.SetActive(false); // let WeaponSwitcher handle active state
+            ShowMessage("SMG unlocked!");
+        }
+        else
+        {
+            // already owned — check if refill is needed
+            BaseGun gun = smgWeapon.GetComponentInChildren<BaseGun>();
+            if (gun == null) return;
+            if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
+            {
+                ShowMessage("Ammo is full!"); return;
+            }
+            if (!CanAfford(smgPrice)) return;
+            DeductScore(smgPrice);
+            gun.reserveAmmo = gun.maxAmmo;
+            gun.currentAmmo = gun.magSize;
+            ShowMessage("SMG ammo refilled!");
+        }
         RefreshShopUI();
     }
 
     public void BuyShotgun()
     {
-        if (shotgunPurchased) { ShowMessage("Already owned!"); return; }
-        if (!CanAfford(shotgunPrice)) return;
-
-        DeductScore(shotgunPrice);
-        shotgunPurchased = true;
-        if (shotgunWeapon != null) shotgunWeapon.SetActive(true);
-        ShowMessage("Shotgun purchased!");
+        if(!shotgunPurchased)
+        {
+            // first purchase — unlock it
+            if (!CanAfford(shotgunPrice)) return;
+            DeductScore(shotgunPrice);
+            shotgunPurchased = true;
+            weaponSwitcher.weaponUnlocked[3] = true;
+            shotgunWeapon.SetActive(false); // let WeaponSwitcher handle active state
+            ShowMessage("Shotgun unlocked!");
+        }
+        else
+        {
+            // already owned — check if refill is needed
+            BaseGun gun = shotgunWeapon.GetComponentInChildren<BaseGun>();
+            if (gun == null) return;
+            if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
+            {
+                ShowMessage("Ammo is full!"); return;
+            }
+            if (!CanAfford(shotgunPrice)) return;
+            DeductScore(shotgunPrice);
+            gun.reserveAmmo = gun.maxAmmo;
+            gun.currentAmmo = gun.magSize;
+            ShowMessage("Shotgun ammo refilled!");
+        }
         RefreshShopUI();
     }
 
     public void BuySniper()
     {
-        if (sniperPurchased) { ShowMessage("Already owned!"); return; }
-        if (!CanAfford(sniperPrice)) return;
-
-        DeductScore(sniperPrice);
-        sniperPurchased = true;
-        if (sniperWeapon != null) sniperWeapon.SetActive(true);
-        ShowMessage("Sniper purchased!");
+        if(!sniperPurchased)
+        {
+            // first purchase — unlock it
+            if (!CanAfford(sniperPrice)) return;
+            DeductScore(sniperPrice);
+            sniperPurchased = true;
+            weaponSwitcher.weaponUnlocked[4] = true;
+            sniperWeapon.SetActive(false); // let WeaponSwitcher handle active state
+            ShowMessage("Sniper unlocked!");
+        }
+        else
+        {
+            // already owned — check if refill is needed
+            BaseGun gun = sniperWeapon.GetComponentInChildren<BaseGun>();
+            if (gun == null) return;
+            if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
+            {
+                ShowMessage("Ammo is full!"); return;
+            }
+            if (!CanAfford(sniperPrice)) return;
+            DeductScore(sniperPrice);
+            gun.reserveAmmo = gun.maxAmmo;
+            gun.currentAmmo = gun.magSize;
+            ShowMessage("Sniper ammo refilled!");
+        }
         RefreshShopUI();
     }
 
-    public void BuyTrap()
+    public void BuyTurret()
     {
-        if (!CanAfford(trapPrice)) return;
+        if (!CanAfford(turretPrice)) return;
+        DeductScore(turretPrice);
+        towerPlacer.AddTower("Turret");
+        ShowMessage("Turret purchased! Press T to place.");
+        RefreshShopUI();
+    }
 
-        DeductScore(trapPrice);
-        // TODO: Add trap to player inventory when trap system is built
-        ShowMessage("Trap purchased!");
+    public void BuyBarbed()
+    {
+        if (!CanAfford(barbedPrice)) return;
+        DeductScore(barbedPrice);
+        towerPlacer.AddTower("BarbedWire");
+        ShowMessage("Barbed Wire purchased! Press X to place.");
+        RefreshShopUI();
+    }
+
+    public void BuyMine()
+    {
+        if (!CanAfford(minePrice)) return;
+        DeductScore(minePrice);
+        towerPlacer.AddTower("Mine");
+        ShowMessage("Mine purchased! Press Z to place.");
         RefreshShopUI();
     }
 
@@ -240,15 +413,13 @@ public class ShopUI : MonoBehaviour
         RefreshShopUI();
     }
 
-    public void BuySpecimenPotion()
+    public void BuyHealthPotion()
     {
-        if (specimenPotionPurchased) { ShowMessage("Already owned!"); return; }
-        if (!CanAfford(specimenPotionPrice)) return;
-
-        DeductScore(specimenPotionPrice);
-        specimenPotionPurchased = true;
-        // TODO: Apply specimen potion effect when decided
-        ShowMessage("Specimen Potion purchased!");
+        if (!CanAfford(healthPrice)) return;
+        if (playerCharacter.currentHealth >= playerCharacter.maxHealth) { ShowMessage("Already full health!"); return; }
+        DeductScore(healthPrice);
+        playerCharacter.currentHealth = Mathf.Min(playerCharacter.currentHealth + 50f, playerCharacter.maxHealth);
+        ShowMessage("Health Potion purchased!");
         RefreshShopUI();
     }
 

@@ -5,12 +5,15 @@ public class WeaponSwitcher : MonoBehaviour
 {
     public GameObject[] weapons;
     public int currentWeapon = 0;
+    public bool[] weaponUnlocked; 
     private RayShooter rayShooter;
     public Transform muzzlePoint;
+    private FPSInput fpsInput;
 
     private void Start()
     {
         rayShooter = FindFirstObjectByType<RayShooter>();
+        fpsInput = FindFirstObjectByType<FPSInput>();
         UpdateActiveGun();
         FindFirstObjectByType<AmmoUI>().SetActiveGun(weapons[currentWeapon].GetComponentInChildren<BaseGun>());
     }
@@ -28,6 +31,8 @@ public class WeaponSwitcher : MonoBehaviour
     public void SwitchTo(int index)
     {
         if (index >= weapons.Length) return;
+        if (!weaponUnlocked[index]) return;
+        if (fpsInput.isReloading) return;
         weapons[currentWeapon].SetActive(false);
         currentWeapon = index;
         weapons[index].SetActive(true);

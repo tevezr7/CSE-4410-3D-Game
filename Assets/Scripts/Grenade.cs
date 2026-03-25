@@ -11,6 +11,7 @@ public class Grenade : Explode
     {
         rb = GetComponent<Rigidbody>();
         Invoke(nameof(Explosion), fuseTime);
+        Debug.Log($"Grenade spawned at: {transform.position}");
     }
 
     public void Throw()
