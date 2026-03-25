@@ -258,7 +258,6 @@ public class ShopUI : MonoBehaviour
         Debug.Log($"BuyAR called | arPurchased: {arPurchased} | score: {uiController.score} | arPrice: {arPrice}");
         if (!arPurchased)
         {
-            // first purchase — unlock it
             if (!CanAfford(arPrice)) return;
             DeductScore(arPrice);
             arPurchased = true;
@@ -268,7 +267,6 @@ public class ShopUI : MonoBehaviour
         }
         else
         {
-            // already owned — check if refill is needed
             BaseGun gun = arWeapon.GetComponentInChildren<BaseGun>();
             if (gun == null) return;
             if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
@@ -288,7 +286,6 @@ public class ShopUI : MonoBehaviour
     {
         if(!smgPurchased)
         {
-            // first purchase — unlock it
             if (!CanAfford(smgPrice)) return;
             DeductScore(smgPrice);
             smgPurchased = true;
@@ -298,7 +295,6 @@ public class ShopUI : MonoBehaviour
         }
         else
         {
-            // already owned — check if refill is needed
             BaseGun gun = smgWeapon.GetComponentInChildren<BaseGun>();
             if (gun == null) return;
             if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
@@ -318,7 +314,6 @@ public class ShopUI : MonoBehaviour
     {
         if(!shotgunPurchased)
         {
-            // first purchase — unlock it
             if (!CanAfford(shotgunPrice)) return;
             DeductScore(shotgunPrice);
             shotgunPurchased = true;
@@ -328,7 +323,6 @@ public class ShopUI : MonoBehaviour
         }
         else
         {
-            // already owned — check if refill is needed
             BaseGun gun = shotgunWeapon.GetComponentInChildren<BaseGun>();
             if (gun == null) return;
             if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
@@ -348,7 +342,6 @@ public class ShopUI : MonoBehaviour
     {
         if(!sniperPurchased)
         {
-            // first purchase — unlock it
             if (!CanAfford(sniperPrice)) return;
             DeductScore(sniperPrice);
             sniperPurchased = true;
@@ -358,7 +351,6 @@ public class ShopUI : MonoBehaviour
         }
         else
         {
-            // already owned — check if refill is needed
             BaseGun gun = sniperWeapon.GetComponentInChildren<BaseGun>();
             if (gun == null) return;
             if (gun.currentAmmo == gun.magSize && gun.reserveAmmo == gun.maxAmmo)
