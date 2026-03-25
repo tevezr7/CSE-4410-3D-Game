@@ -258,7 +258,7 @@ public class FPSInput : MonoBehaviour
         yield return new WaitForSeconds(0.4f);
         weaponSwitcher.SwitchTo(previousWeapon);
         isThrowingGrenade = false;
-    } //will do tmr
+    } 
 
     public void OnRightLean(InputAction.CallbackContext context)
     {
