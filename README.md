@@ -1,6 +1,6 @@
 # Zombie Survival Game for Midterm
 A first-person zombie survival shooter built in Unity. Survive endless waves, earn points, buy weapons, survive, and keep the specimen safe as long as possible.  
-Developers: Aldair Perez, Sebastian Garay Guzman
+Developers: Aldair Perez, Sebastian Garay Guzman  
 Group: SWS  
 Course: CSE 4410  
 Engine: Unity 6000.3.7f1  
