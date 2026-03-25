@@ -4,7 +4,7 @@ Developers: Aldair Perez, Sebastian Garay Guzman
 Course: CSE 4410  
 Engine: Unity 6000.3.7f1  
 
-##Gameplay
+## Gameplay
 
 Survive escalating waves of zombie enemies  
 Use responsive firearms with realistic recoil and handmade animations to take down zombies  
@@ -15,13 +15,13 @@ Quickly knife and grenade zombies when you need to with physics based grenade th
 Deploy turrets, barbed wire, and claymores to assist your defense  
 Keep the specimen alive!!  
 
-##Enemies
+## Enemies
 
 Zombie - Standard melee enemy that chases and attacks the player  
 Shooter Zombie - Ranged enemy that attacks from a distance, ignores specimen  
 Boss Zombie - High health, high damage enemy that appears at later waves  
 
-##Controls
+## Controls
 Move  W A S D  
 Lean  Q E  
 Sprint  Shift  
@@ -39,9 +39,9 @@ Trap #3  T
 Interact / Buy  F  
 Pause  ESC  
 
-##Individual Contributions
+## Individual Contributions
 
-###Aldair Perez
+### Aldair Perez
 
 Player controller and movement systems (leaning, sprinting, jumping, crouching, sliding on top of default movement)  
 Weapon system and weapon switching  
@@ -55,7 +55,7 @@ Grenade and trap system
 Turret AI  
 Player UI (health, stamina, ammo, grenade, points display)  
 
-###Sebastian Garay Guzman
+### Sebastian Garay Guzman
 
 Compass system  
 Shop system and shop UI  
@@ -65,27 +65,27 @@ Pause menu
 Death screen  
 Win screen  
 
-##Third-Party Assets
+## Third-Party Assets
 
-###Weapons
+### Weapons
 Low Poly Pistol Weapon Pack 3, Low Poly ShotGun Weapon Pack 1, Low Poly Weapon Series 4 MW 1, all by CASTLE BRAVO  
 Knife: M9 Bayonet by Zesse  
 Claymore (Game-Ready) by Justin Miersch  
 FREE: Sci-Fi Low Poly Grenades - Cosmic Retro by The PolynestLab  
 
-###Environment
+### Environment
 Low Poly Barriers Pack Free by Schatro Dev Assets  
 Lowpoly Wasteland Props by Evgenia  
 PBR Ground Materials #2 (Dirt, Grass & Rocky) by John's Junkyard Assets  
 Damaged Models Pack 1 by INSERT RN  
 Assets FenceChained by INSERT RN  
 
-###Characters
+### Characters
 Character Pack: Zombie Sample by Supercyan  
 Rigged FPS arms by AidanP  
 
-###Turret
+### Turret
 Tower Defence Sci-Fi Turret by Firadzo Assets  
 
-###Audio
+### Audio
 DRAGON-STUDIO (Pixabay) for all gun sounds and Sebastian for player damage sounds  
