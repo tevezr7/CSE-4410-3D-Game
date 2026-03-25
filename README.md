@@ -28,10 +28,10 @@ Sprint  Shift
 Crouch  C  
 Slide  Shift + C while moving  
 Look  Mouse  
-ShootLeft  Click  
-AimRight  Click  
+Shoot  Left Click  
+Aim  Right Click  
 Reload  R  
-Switch Weapon 1-5  
+Switch Weapon  1-5  
 Throw Grenade  G  
 Trap #1  Q  
 Trap #2  Z  
