@@ -77,8 +77,9 @@ FREE: Sci-Fi Low Poly Grenades - Cosmic Retro by The PolynestLab
 Low Poly Barriers Pack Free by Schatro Dev Assets  
 Lowpoly Wasteland Props by Evgenia  
 PBR Ground Materials #2 (Dirt, Grass & Rocky) by John's Junkyard Assets  
-Damaged Models Pack 1 by Gest 
+Damaged Models Pack 1 by Gest  
 Chainlink Fences by Kobra Game Studios
+HiTech SciFi Energy Cell by AntiDed GameDev  
 
 ### Characters
 Character Pack: Zombie Sample by Supercyan  
