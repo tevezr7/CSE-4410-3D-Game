@@ -15,10 +15,8 @@ public class AmmoUI : MonoBehaviour
     {
         if (activeGun == null)
         {
-            Debug.Log("AmmoUI: activeGun is null");
             return;
         }
-        Debug.Log($"AmmoUI: {activeGun.currentAmmo} / {activeGun.reserveAmmo}");
         ammoText.text = $"{activeGun.currentAmmo} / {activeGun.reserveAmmo}";
     }
 }
